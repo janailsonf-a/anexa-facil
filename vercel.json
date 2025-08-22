@@ -11,5 +11,9 @@
         "framework": "create-react-app"
       }
     }
+  ],
+  "routes": [
+    { "src": "/api/process", "dest": "/api/process.py" },
+    { "src": "/(.*)", "dest": "/index.html" }
   ]
 }
