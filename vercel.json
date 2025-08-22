@@ -1,11 +1,9 @@
 {
   "builds": [
-    { "src": "package.json", "use": "@vercel/static-build", "config": { "framework": "create-react-app" } },
+    { "src": "package.json", "use": "@vercel/static-build" },
     { "src": "api/process.py", "use": "@vercel/python" }
   ],
   "routes": [
-    { "src": "/api/process", "dest": "/api/process.py" },
-    { "handle": "filesystem" },
-    { "src": "/(.*)", "dest": "/index.html" }
+    { "src": "/api/process", "dest": "/api/process.py" }
   ]
 }
