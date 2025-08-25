@@ -8,11 +8,7 @@
 
 Uma aplicação web inteligente para unificar boletos e comprovantes de pagamento em um único documento PDF, de forma rápida e profissional.
 
-![Screenshot do Anexa Fácil](./screenshot.png)
-_Substitua o `screenshot.png` pelo nome da sua imagem de captura de tela._
-
-**[➡️ Clique aqui para ver a demonstração ao vivo](https://anexa-facil-kcrz.vercel.app/)**
-_👆 Substitua pelo seu link final da Vercel!_
+**[➡️ Clique aqui para ver a demonstração ao vivo](https://anexa-facil.vercel.app/)**
 
 ---
 
