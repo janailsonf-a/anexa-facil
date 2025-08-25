@@ -102,7 +102,3 @@ Para rodar este projeto na sua máquina, siga os passos abaixo.
 
 **Janailson Firmino**
 * GitHub: [@janailsonf-a](https://github.com/janailsonf-a)
-
----
-
-Projeto desenvolvido como parte de um processo de aprendizado contínuo, com a ajuda do **Parceiro de Programação**.
