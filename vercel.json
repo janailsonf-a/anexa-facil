@@ -1,9 +1,18 @@
 {
   "builds": [
-    { "src": "package.json", "use": "@vercel/static-build", "config": { "distDir": "build" } },
-    { "src": "api/process.py", "use": "@vercel/python" }
-  ],
-  "routes": [
-    { "src": "/api/process", "dest": "/api/process.py" }
+    {
+      "src": "api/**/*.py",
+      "use": "@vercel/python",
+      "config": {
+        "pythonVersion": "3.9"
+      }
+    },
+    {
+      "src": "package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "framework": "create-react-app"
+      }
+    }
   ]
 }
