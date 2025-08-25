@@ -55,7 +55,7 @@ def process_files():
         # ... (o resto do processamento continua exatamente o mesmo) ...
         with tempfile.NamedTemporaryFile(suffix=".pdf") as temp_pdf:
             temp_pdf.write(boleto_bytes)
-            imagens_boleto = convert_from_path(temp_pdf.name, dpi=300, poppler_path="/usr/bin")
+            imagens_boleto = convert_from_path(temp_pdf.name, dpi=300)
 
         imagem_boleto = imagens_boleto[0]
 
