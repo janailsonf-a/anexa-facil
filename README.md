@@ -1,72 +1,112 @@
-# Getting Started with Create React App
+# Anexa Fácil 📄✨
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+![React](https://img.shields.io/badge/react-%2320232a.svg?style=for-the-badge&logo=react&logoColor=%2361DAFB)
+![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)
+![Flask](https://img.shields.io/badge/flask-%23000.svg?style=for-the-badge&logo=flask&logoColor=white)
+![TailwindCSS](https://img.shields.io/badge/tailwindcss-%2338B2AC.svg?style=for-the-badge&logo=tailwind-css&logoColor=white)
+![Vercel](https://img.shields.io/badge/vercel-%23000000.svg?style=for-the-badge&logo=vercel&logoColor=white)
 
-## Available Scripts
+Uma aplicação web inteligente para unificar boletos e comprovantes de pagamento em um único documento PDF, de forma rápida e profissional.
 
-In the project directory, you can run:
+![Screenshot do Anexa Fácil](./screenshot.png)
+_Substitua o `screenshot.png` pelo nome da sua imagem de captura de tela._
 
-### `npm start`
+**[➡️ Clique aqui para ver a demonstração ao vivo](https://anexa-facil-kcrz.vercel.app/)**
+_👆 Substitua pelo seu link final da Vercel!_
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+---
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## 🎯 Sobre o Projeto
 
-### `npm test`
+O "Anexa Fácil" nasceu da necessidade de otimizar uma tarefa manual e repetitiva: a de juntar um boleto em PDF com seu respectivo comprovante de pagamento em imagem. O processo, geralmente feito em editores de texto, era lento e pouco prático.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+Esta aplicação resolve o problema com uma interface web moderna e um backend poderoso, automatizando todo o processo em segundos.
 
-### `npm run build`
+---
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## ✨ Principais Funcionalidades
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+* **Unificação de Arquivos:** Combina um arquivo PDF e um arquivo de imagem em um único documento PDF.
+* **Nome de Arquivo Inteligente (OCR):** Utiliza OCR (Reconhecimento Óptico de Caracteres) para ler o nome do pagador e a data de vencimento do boleto, gerando um nome de arquivo padronizado e organizado.
+* **Interface Moderna:** Design responsivo, com tema escuro, criado com React e Tailwind CSS.
+* **Pré-visualização de Imagem:** O usuário pode ver uma miniatura do comprovante antes de enviar.
+* **Otimização no Frontend:** Comprime as imagens no navegador antes do upload para um processamento mais rápido e eficiente.
+* **Tratamento de Erros:** Valida os tipos de arquivo no backend e exibe mensagens de erro claras para o usuário.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+---
 
-### `npm run eject`
+## 🛠️ Tecnologias Utilizadas
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+#### **Frontend**
+* **React.js:** Biblioteca principal para a construção da interface.
+* **Tailwind CSS:** Para estilização rápida e moderna.
+* **browser-image-compression:** Para otimização das imagens no lado do cliente.
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+#### **Backend**
+* **Python 3.9:** Linguagem principal da API.
+* **Flask:** Micro-framework para criar a API.
+* **Pillow:** Para manipulação e colagem de imagens.
+* **pdf2image:** Para converter as páginas do PDF em imagens.
+* **pytesseract:** Wrapper Python para o motor de OCR Tesseract.
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+#### **Infraestrutura e Deploy**
+* **Vercel:** Para a hospedagem do frontend e do backend (serverless functions).
+* **Git & GitHub:** Para versionamento de código e fluxo de CI/CD com a Vercel.
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+---
 
-## Learn More
+## 🚀 Como Rodar Localmente
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+Para rodar este projeto na sua máquina, siga os passos abaixo.
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+### Pré-requisitos
+* **Node.js** (v18 ou superior)
+* **Python** (v3.9 ou superior) e `pip`
+* **Git**
+* **Dependências de Sistema (Linux/Debian):**
+  ```bash
+  sudo apt-get update
+  sudo apt-get install poppler-utils tesseract-ocr tesseract-ocr-por
+  ```
 
-### Code Splitting
+### Instalação e Execução
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+1.  **Clone o repositório:**
+    ```bash
+    git clone [https://github.com/janailsonf-a/anexa-facil.git](https://github.com/janailsonf-a/anexa-facil.git)
+    cd anexa-facil
+    ```
 
-### Analyzing the Bundle Size
+2.  **Configure e rode o Backend (Terminal 1):**
+    ```bash
+    # Crie e ative o ambiente virtual
+    python3 -m venv .venv
+    source .venv/bin/activate
+    
+    # Instale as dependências Python
+    pip install -r api/requirements.txt
+    
+    # Rode o servidor Flask
+    flask --app api/process run
+    ```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+3.  **Configure e rode o Frontend (Terminal 2):**
+    ```bash
+    # Instale as dependências do Node.js
+    npm install
+    
+    # Rode o servidor de desenvolvimento do React
+    npm start
+    ```
+4.  Abra seu navegador e acesse `http://localhost:3000`.
 
-### Making a Progressive Web App
+---
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+## 👤 Autor
 
-### Advanced Configuration
+**Janailson Firmino**
+* GitHub: [@janailsonf-a](https://github.com/janailsonf-a)
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+---
 
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
-# anexa-facil
-# anexa-facil
+Projeto desenvolvido como parte de um processo de aprendizado contínuo, com a ajuda do **Parceiro de Programação**.
