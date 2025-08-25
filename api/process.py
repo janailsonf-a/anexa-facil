@@ -1,66 +1,100 @@
-# api/process.py
-import os
-import io
-import tempfile
 from flask import Flask, request, send_file, jsonify
 from PIL import Image, ImageOps
-import fitz  # PyMuPDF
+from pdf2image import convert_from_path
+import io
+import tempfile
+import pytesseract
+import re
 
 app = Flask(__name__)
 
-# Se estiver na Vercel, a URL pública é /api/process
-# Dentro do Flask, use "/" para a function.
-# Para ambiente local, também exponho "/api/process" para facilitar testes.
+# ... (as funções extrair_nome_pagador e extrair_data_vencimento continuam iguais) ...
+def extrair_nome_pagador(texto_completo):
+    linhas = texto_completo.split('\n')
+    for i, linha in enumerate(linhas):
+        if re.search(r'pagador', linha, re.IGNORECASE):
+            partes = re.split(r':\s*', linha)
+            if len(partes) > 1 and partes[1].strip():
+                return partes[1].strip()
+            if i + 1 < len(linhas) and linhas[i+1].strip():
+                return linhas[i+1].strip()
+    return None
 
-@app.post("/")
-@app.post("/api/process")
+def extrair_data_vencimento(texto_completo):
+    match = re.search(r'(\d{2})/(\d{2})/(\d{4})', texto_completo)
+    if match:
+        return match.group(2), match.group(3)
+    return None
+
+@app.route('/api/process', methods=['POST'])
 def process_files():
     try:
-        # validação
-        if "boleto" not in request.files or "comprovante" not in request.files:
-            return jsonify({"error": "Envie 'boleto' (PDF) e 'comprovante' (imagem)."}), 400
+        # --- NOVA LÓGICA DE VALIDAÇÃO ---
+        if 'boleto' not in request.files or 'comprovante' not in request.files:
+            return jsonify(error="Ambos os arquivos (boleto e comprovante) são obrigatórios."), 400
 
-        boleto_file = request.files["boleto"]
-        comprovante_file = request.files["comprovante"]
+        boleto_file = request.files['boleto']
+        comprovante_file = request.files['comprovante']
+
+        # Verifica se os arquivos não estão vazios
+        if boleto_file.filename == '' or comprovante_file.filename == '':
+            return jsonify(error="Por favor, selecione ambos os arquivos."), 400
+
+        # Verifica o tipo do arquivo do boleto (MIME Type)
+        if boleto_file.mimetype != 'application/pdf':
+            return jsonify(error=f"Arquivo '{boleto_file.filename}' não é um PDF válido."), 400
+
+        # Verifica o tipo do arquivo do comprovante
+        if not comprovante_file.mimetype.startswith('image/'):
+            return jsonify(error=f"Arquivo '{comprovante_file.filename}' não é uma imagem válida."), 400
+        # --- FIM DA VALIDAÇÃO ---
 
         boleto_bytes = boleto_file.read()
         comprovante_bytes = comprovante_file.read()
 
-        # --- Renderiza a 1ª página do PDF sem Poppler (PyMuPDF) ---
-        doc = fitz.open(stream=boleto_bytes, filetype="pdf")
-        page = doc.load_page(0)
-        # dpi ~300 para boa definição
-        pix = page.get_pixmap(dpi=300, alpha=False)
-        imagem_boleto = Image.frombytes("RGB", (pix.width, pix.height), pix.samples)
+        # ... (o resto do processamento continua exatamente o mesmo) ...
+        with tempfile.NamedTemporaryFile(suffix=".pdf") as temp_pdf:
+            temp_pdf.write(boleto_bytes)
+            imagens_boleto = convert_from_path(temp_pdf.name, dpi=300, poppler_path="/usr/bin")
 
-        # --- “Crop inteligente” (como você fazia com invert+getbbox) ---
-        imagem_invertida = ImageOps.invert(imagem_boleto.convert("RGB"))
+        imagem_boleto = imagens_boleto[0]
+
+        texto_do_boleto = pytesseract.image_to_string(imagem_boleto, lang='por')
+
+        nome_pagador_completo = extrair_nome_pagador(texto_do_boleto)
+        data_vencimento = extrair_data_vencimento(texto_do_boleto)
+
+        nome_do_arquivo = "comprovante_final.pdf"
+
+        if nome_pagador_completo and data_vencimento:
+            primeiro_nome = nome_pagador_completo.split(' ')[0].capitalize()
+            mes_num, ano = data_vencimento
+            meses_pt = {"01": "Janeiro", "02": "Fevereiro", "03": "Março", "04": "Abril", "05": "Maio", "06": "Junho", "07": "Julho", "08": "Agosto", "09": "Setembro", "10": "Outubro", "11": "Novembro", "12": "Dezembro"}
+            mes_nome = meses_pt.get(mes_num, mes_num)
+            nome_do_arquivo = f"{primeiro_nome} - Pagamento Mensal Bolsa Faculdade - [{mes_nome}-{ano}].pdf"
+
+        imagem_invertida = ImageOps.invert(imagem_boleto.convert('RGB'))
         bbox = imagem_invertida.getbbox()
-        if bbox:
-            imagem_boleto = imagem_boleto.crop(bbox)
+        imagem_boleto = imagem_boleto.crop(bbox)
 
-        # --- Trata o comprovante ---
-        imagem_comprovante = Image.open(io.BytesIO(comprovante_bytes)).convert("RGB")
-        # rotaciona 90° (se não precisar, remova)
-        imagem_comprovante = imagem_comprovante.rotate(90, expand=True)
+        imagem_comprovante = Image.open(io.BytesIO(comprovante_bytes))
+        imagem_comprovante_rotacionada = imagem_comprovante.rotate(90, expand=True)
 
-        # redimensiona comprovante para a mesma largura do boleto
         largura_boleto, altura_boleto = imagem_boleto.size
-        proporcao = imagem_comprovante.height / imagem_comprovante.width
-        nova_largura = largura_boleto
-        nova_altura = int(proporcao * nova_largura)
-        imagem_comprovante = imagem_comprovante.resize((nova_largura, nova_altura))
+        proporcao_comprovante = imagem_comprovante_rotacionada.height / imagem_comprovante_rotacionada.width
+        nova_largura_comprovante = largura_boleto
+        nova_altura_comprovante = int(proporcao_comprovante * nova_largura_comprovante)
+        imagem_comprovante_final = imagem_comprovante_rotacionada.resize((nova_largura_comprovante, nova_altura_comprovante))
 
-        # layout final
-        espacamento_meio = 200
-        margem_inferior = 500
-        altura_total = altura_boleto + espacamento_meio + nova_altura + margem_inferior
+        espacamento_meio_pixels = 300
+        margem_inferior_pixels = 80
 
-        imagem_final = Image.new("RGB", (largura_boleto, altura_total), "white")
+        altura_total = altura_boleto + espacamento_meio_pixels + nova_altura_comprovante + margem_inferior_pixels
+        imagem_final = Image.new('RGB', (largura_boleto, altura_total), 'white')
+
         imagem_final.paste(imagem_boleto, (0, 0))
-        imagem_final.paste(imagem_comprovante, (0, altura_boleto + espacamento_meio))
+        imagem_final.paste(imagem_comprovante_final, (0, altura_boleto + espacamento_meio_pixels))
 
-        # gera PDF em memória
         buffer_saida = io.BytesIO()
         imagem_final.save(buffer_saida, "PDF", resolution=300.0)
         buffer_saida.seek(0)
@@ -68,10 +102,16 @@ def process_files():
         return send_file(
             buffer_saida,
             as_attachment=True,
-            download_name="comprovante_final.pdf",
-            mimetype="application/pdf",
+            download_name=nome_do_arquivo,
+            mimetype='application/pdf'
         )
 
     except Exception as e:
-        # log simples
-        return jsonify({"error": str(e)}), 500
+        # ... (o bloco de erro "catch-all" continua igual) ...
+        print(f"\n--- [ERRO GRAVE NO BACKEND] ---")
+        print(f"TIPO DE ERRO: {type(e).__name__}")
+        print(f"MENSAGEM DE ERRO: {e}")
+        import traceback
+        traceback.print_exc()
+        print("--- FIM DO RELATÓRIO DE ERRO ---\n")
+        return jsonify(error="Ocorreu um erro inesperado no servidor."), 500
